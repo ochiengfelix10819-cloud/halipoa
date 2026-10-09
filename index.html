@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HaliPoa | Smart Business Assistant</title>
+<style>
+:root {
+  --green: #087f5b;
+  --dark: #16352d;
+  --bg: #f4f7f5;
+  --muted: #687871;
+  --border: #e0e8e3;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: var(--bg);
+  color: #24332d;
+}
+header {
+  background: var(--dark);
+  color: white;
+  padding: 22px 6%;
+}
+.brand { font-size: 26px; font-weight: 800; }
+header p { color: #d1e3d9; margin-bottom: 0; }
+main { max-width: 1100px; margin: auto; padding: 24px 16px; }
+h2 { font-size: 19px; }
+.muted { color: var(--muted); font-size: 13px; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.card, .stat {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 17px;
+}
+.stat strong { display: block; font-size: 25px; margin-top: 8px; }
+.layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.85fr) 1.5fr;
+  gap: 18px;
+  align-items: start;
+}
+label { display: block; font-size: 13px; margin: 13px 0 6px; }
+input, select, textarea {
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #cfdcd3;
+  border-radius: 8px;
+  background: white;
+  font: inherit;
+  font-size: 14px;
+}
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 14px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+}
+.primary { background: var(--green); color: white; }
+.secondary { background: #e6f3ec; color: var(--green); }
+.danger { background: #fff0ee; color: #a6382c; }
+button:hover { opacity: .85; }
+.full { width: 100%; margin-top: 16px; }
+.toolbar {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.toolbar select { flex: 1; min-width: 120px; }
+.task {
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 14px;
+  margin-top: 10px;
+  background: #fff;
+}
+.task-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.task h3 { font-size: 15px; margin: 0 0 7px; }
+.badge {
+  border-radius: 20px;
+  padding: 5px 8px;
+  font-size: 11px;
+  white-space: nowrap;
+  background: #e6f3ec;
+  color: #087f5b;
+  height: fit-content;
+}
+.badge.overdue { background: #ffe6e2; color: #ad3328; }
+.badge.done { background: #e8edf0; color: #53616b; }
+.task-actions { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 12px; }
+.task-actions button { padding: 9px; }
+.empty { text-align: center; color: var(--muted); padding: 30px 8px; }
+footer { text-align: center; padding: 25px; color: var(--muted); font-size: 12px; }
+@media(max-width: 700px) {
+  .layout { grid-template-columns: 1fr; }
+  .stats { gap: 7px; }
+  .stat { padding: 12px 9px; }
+  .stat strong { font-size: 20px; }
+  header { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">🌿 HaliPoa</div>
+  <p>Your small-business follow-up assistant.</p>
+</header>
+
+<main>
+  <h2>Business overview</h2>
+  <p class="muted">Keep track of orders, tasks and customer follow-ups.</p>
+
+  <section class="stats">
+    <div class="stat">
+      <span class="muted">All tasks</span>
+      <strong id="total">0</strong>
+    </div>
+    <div class="stat">
+      <span class="muted">Pending</span>
+      <strong id="pending">0</strong>
+    </div>
+    <div class="stat">
+      <span class="muted">Order value</span>
+      <strong id="sales">KSh 0</strong>
+    </div>
+  </section>
+
+  <div class="layout">
+    <section class="card">
+      <h2>Add a task or order</h2>
+      <p class="muted">Enter the details once. HaliPoa will organize them.</p>
+
+      <form id="taskForm">
+        <label for="title">Task or order description *</label>
+        <input id="title" required maxlength="100"
+          placeholder="e.g. Phone charger collection">
+
+        <label for="customer">Customer name</label>
+        <input id="customer" maxlength="70"
+          placeholder="e.g. Alex">
+
+        <label for="phone">Customer phone (optional)</label>
+        <input id="phone" type="tel" maxlength="20"
+          placeholder="e.g. 07XXXXXXXX">
+
+        <label for="amount">Order value (KSh)</label>
+        <input id="amount" type="number" min="0" step="0.01"
+          placeholder="e.g. 800">
+
+        <label for="due">Due date *</label>
+        <input id="due" type="date" required>
+
+        <label for="kind">Task type</label>
+        <select id="kind">
+          <option value="Order">Customer order</option>
+          <option value="Follow-up">Customer follow-up</option>
+          <option value="Appointment">Appointment</option>
+          <option value="Other">Other task</option>
+        </select>
+
+        <button class="primary full" type="submit">+ Add to dashboard</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>My tasks</h2>
+      <p class="muted" id="todayText"></p>
+
+      <div class="toolbar">
+        <input id="search" placeholder="Search tasks..."
+          aria-label="Search tasks">
+        <select id="filter" aria-label="Filter tasks">
+          <option value="all">All tasks</option>
+          <option value="pending">Pending</option>
+          <option value="overdue">Overdue</option>
+          <option value="done">Completed</option>
+        </select>
+      </div>
+
+      <div id="taskList"></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  HaliPoa prototype · Your data stays in this browser.
+  Export important records separately.
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const STORAGE_KEY = "halipoa_tasks_v1";
+
+let tasks = [];
+try {
+  tasks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  if (!Array.isArray(tasks)) tasks = [];
+} catch {
+  tasks = [];
+}
+
+function localDate(date = new Date()) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function money(value) {
+  return "KSh " + Number(value || 0).toLocaleString("en-KE", {
+    maximumFractionDigits: 2
+  });
+}
+
+function status(task) {
+  if (task.done) return "done";
+  if (task.due < localDate()) return "overdue";
+  return "pending";
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  render();
+}
+
+function render() {
+  const pending = tasks.filter(t => !t.done);
+  const totalValue = tasks
+    .filter(t => t.kind === "Order")
+    .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+  $("total").textContent = tasks.length;
+  $("pending").textContent = pending.length;
+  $("sales").textContent = money(totalValue);
+
+  const today = localDate();
+  const dueToday = pending.filter(t => t.due === today).length;
+  const overdue = pending.filter(t => t.due < today).length;
+
+  $("todayText").textContent =
+    `${dueToday} due today · ${overdue} overdue`;
+
+  const query = $("search").value.toLowerCase().trim();
+  const filter = $("filter").value;
+
+  const shown = tasks.filter(t => {
+    const s = status(t);
+    const matchesFilter = filter === "all" || filter === s;
+    const matchesQuery = [t.title, t.customer, t.kind]
+      .join(" ").toLowerCase().includes(query);
+    return matchesFilter && matchesQuery;
+  }).sort((a, b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    return a.due.localeCompare(b.due);
+  });
+
+  const list = $("taskList");
+  list.replaceChildren();
+
+  if (!shown.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    empty.textContent = tasks.length
+      ? "No tasks match your search."
+      : "No tasks yet. Add your first task!";
+    list.appendChild(empty);
+    return;
+  }
+
+  shown.forEach(task => {
+    const s = status(task);
+    const card = document.createElement("article");
+    card.className = "task";
+
+    const top = document.createElement("div");
+    top.className = "task-top";
+
+    const info = document.createElement("div");
+    const heading = document.createElement("h3");
+    heading.textContent = task.title;
+
+    const detail = document.createElement("div");
+    detail.className = "muted";
+    detail.textContent =
+      `${task.kind} · ${task.customer || "No customer"} · Due ${task.due}`;
+
+    info.append(heading, detail);
+
+    const badge = document.createElement("span");
+    badge.className = "badge " + s;
+    badge.textContent = s === "done" ? "Completed"
+      : s === "overdue" ? "Overdue" : "Pending";
+
+    top.append(info, badge);
+    card.appendChild(top);
+
+    if (task.kind === "Order") {
+      const amount = document.createElement("p");
+      amount.className = "muted";
+      amount.textContent = "Order value: " + money(task.amount);
+      card.appendChild(amount);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "task-actions";
+
+    const messageButton = document.createElement("button");
+    messageButton.className = "secondary";
+    messageButton.textContent = "Prepare message";
+    messageButton.onclick = () => prepareMessage(task);
+    actions.appendChild(messageButton);
+
+    const completeButton = document.createElement("button");
+    completeButton.className = "secondary";
+    completeButton.textContent = task.done ? "Reopen" : "Mark complete";
+    completeButton.onclick = () => {
+      task.done = !task.done;
+      save();
+    };
+    actions.appendChild(completeButton);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "danger";
+    deleteButton.textContent = "Delete";
+    deleteButton.onclick = () => {
+      if (confirm("Delete this task?")) {
+        tasks = tasks.filter(t => t.id !== task.id);
+        save();
+      }
+    };
+    actions.appendChild(deleteButton);
+
+    card.appendChild(actions);
+    list.appendChild(card);
+  });
+}
+
+$("taskForm").addEventListener("submit", event => {
+  event.preventDefault();
+
+  const amount = $("amount").value;
+  if (amount && Number(amount) < 0) {
+    alert("Enter a valid order value.");
+    return;
+  }
+
+  tasks.push({
+    id: Date.now().toString() + Math.random().toString(16).slice(2),
+    title: $("title").value.trim(),
+    customer: $("customer").value.trim(),
+    phone: $("phone").value.trim(),
+    amount: amount ? Number(amount) : 0,
+    due: $("due").value,
+    kind: $("kind").value,
+    done: false
+  });
+
+  save();
+  event.target.reset();
+  $("due").value = localDate();
+});
+
+function prepareMessage(task) {
+  const name = task.customer || "there";
+  let message = `Hello ${name}, `;
+  if (task.kind === "Order") {
+    message += `your order (${task.title}) `;
+    message += `for ${money(task.amount)} is due for collection `;
+    message += `on ${task.due}. Please let us know if you have any questions.`;
+  } else if (task.kind === "Appointment") {
+    message += `this is a reminder about ${task.title} on ${task.due}.`;
+  } else {
+    message += `I'm following up regarding ${task.title}.`;
+  }
+
+  const area = document.createElement("textarea");
+  area.value = message;
+  area.setAttribute("aria-label", "Prepared customer message");
+  area.style.marginTop = "12px";
+  area.style.minHeight = "90px";
+
+  const box = document.createElement("div");
+  box.className = "task";
+  const heading = document.createElement("h3");
+  heading.textContent = "Review your message";
+  const note = document.createElement("p");
+  note.className = "muted";
+  note.textContent = "Check the details before sending.";
+  const copy = document.createElement("button");
+  copy.className = "primary";
+  copy.textContent = "Copy message";
+  copy.style.marginTop = "8px";
+  copy.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(area.value);
+      copy.textContent = "Copied!";
+    } catch {
+      area.focus();
+      area.select();
+      alert("Select the message and copy it manually.");
+    }
+  };
+
+  box.append(heading, note, area, copy);
+  $("taskList").prepend(box);
+  area.focus();
+}
+
+$("search").addEventListener("input", render);
+$("filter").addEventListener("change", render);
+
+$("due").value = localDate();
+render();
+</script>
+</body>
+</html>
